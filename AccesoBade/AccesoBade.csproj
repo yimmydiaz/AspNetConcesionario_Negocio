@@ -8,17 +8,17 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7E2C5E3A-D063-4FF1-9B82-283D8716B709}</ProjectGuid>
+    <ProjectGuid>{A6DF8A44-EF33-468D-8BE9-00DF99711213}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ASPConcesionario</RootNamespace>
-    <AssemblyName>ASPConcesionario</AssemblyName>
+    <RootNamespace>AccesoBade</RootNamespace>
+    <AssemblyName>AccesoBade</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44332</IISExpressSSLPort>
+    <IISExpressSSLPort>44366</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
@@ -45,18 +45,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Security" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -129,51 +121,8 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\Parameters\CategoriaController.cs" />
-    <Compile Include="Controllers\Parameters\MarcaController.cs" />
-    <Compile Include="Controllers\Parameters\ProveedorController.cs" />
-    <Compile Include="Controllers\Vehiculo\VehiculoController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\ModeloConcesionario.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModeloConcesionario.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\ModeloConcesionario.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\ModeloConcesionario.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModeloConcesionario.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\tb_categoria.cs">
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\tb_cliente.cs">
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\tb_fotos.cs">
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\tb_marca.cs">
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\tb_proveedor.cs">
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\tb_usuario_vendedor.cs">
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\tb_vehiculo.cs">
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
-    </Compile>
-    <Compile Include="ModeloBD\tb_vendedor.cs">
-      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -186,25 +135,8 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
-    <Content Include="ModeloBD\ModeloConcesionario.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ModeloConcesionario.Context.cs</LastGenOutput>
-      <DependentUpon>ModeloConcesionario.edmx</DependentUpon>
-    </Content>
-    <Content Include="ModeloBD\ModeloConcesionario.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>ModeloConcesionario.edmx</DependentUpon>
-      <LastGenOutput>ModeloConcesionario.cs</LastGenOutput>
-    </Content>
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <EntityDeploy Include="ModeloBD\ModeloConcesionario.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>ModeloConcesionario.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <Content Include="ModeloBD\ModeloConcesionario.edmx.diagram">
-      <DependentUpon>ModeloConcesionario.edmx</DependentUpon>
-    </Content>
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -230,26 +162,6 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Categoria\Create.cshtml" />
-    <Content Include="Views\Categoria\Delete.cshtml" />
-    <Content Include="Views\Categoria\Details.cshtml" />
-    <Content Include="Views\Categoria\Edit.cshtml" />
-    <Content Include="Views\Categoria\Index.cshtml" />
-    <Content Include="Views\Marca\Create.cshtml" />
-    <Content Include="Views\Marca\Delete.cshtml" />
-    <Content Include="Views\Marca\Details.cshtml" />
-    <Content Include="Views\Marca\Edit.cshtml" />
-    <Content Include="Views\Marca\Index.cshtml" />
-    <Content Include="Views\Proveedor\Create.cshtml" />
-    <Content Include="Views\Proveedor\Delete.cshtml" />
-    <Content Include="Views\Proveedor\Details.cshtml" />
-    <Content Include="Views\Proveedor\Edit.cshtml" />
-    <Content Include="Views\Proveedor\Index.cshtml" />
-    <Content Include="Views\Vehiculo\Create.cshtml" />
-    <Content Include="Views\Vehiculo\Delete.cshtml" />
-    <Content Include="Views\Vehiculo\Details.cshtml" />
-    <Content Include="Views\Vehiculo\Edit.cshtml" />
-    <Content Include="Views\Vehiculo\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -268,9 +180,6 @@
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -287,9 +196,9 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>53498</DevelopmentServerPort>
+          <DevelopmentServerPort>65349</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44332/</IISUrl>
+          <IISUrl>https://localhost:44366/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
