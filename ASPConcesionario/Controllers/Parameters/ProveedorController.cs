@@ -1,23 +1,34 @@
-﻿using System;
+﻿using ASPConcesionario.Helpers;
+using ASPConcesionario.Mapeadores.Parametros;
+using ASPConcesionario.Models.Parametros;
+using LogicaNegocio.DTO.Parametros;
+using LogicaNegocio.Implementacion.Parametros;
+using PagedList;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using ASPConcesionario.ModeloBD;
+
 
 namespace ASPConcesionario.Controllers.Parameters
 {
     public class ProveedorController : Controller
     {
-        private ConcesionarioBDEntities db = new ConcesionarioBDEntities();
+        private ImplProveedorLogica logica = new ImplProveedorLogica();
 
         // GET: Proveedor
-        public ActionResult Index()
+        public ActionResult Index(int? page, string filtro = "")
         {
-            return View(db.tb_proveedor.ToList());
+            int numPagina = page ?? 1;
+            int registroPorPagina = DatosGenerales.RegistroPorPagina;
+            int totalRegistro;
+            IEnumerable<ProveedorDTO> listaDatos = logica.ListarRegistros(
+                            filtro, numPagina, registroPorPagina, out totalRegistro);
+            MapeadorProveedorGUI mapper = new MapeadorProveedorGUI();
+            IEnumerable<ModeloProveedor> listaModelo = mapper.MapearTipo1Tipo2(listaDatos);
+            //var registroPagina = listaModelo.ToPagedList(numPagina, 2);
+            var listaPagina = new StaticPagedList<ModeloProveedor>
+                (listaModelo, numPagina, registroPorPagina, totalRegistro);
+            return View(listaPagina);
         }
 
         // GET: Proveedor/Details/5
@@ -27,12 +38,14 @@ namespace ASPConcesionario.Controllers.Parameters
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_proveedor tb_proveedor = db.tb_proveedor.Find(id);
-            if (tb_proveedor == null)
+            ProveedorDTO ProveedorDTO = logica.BuscarRegistro(id.Value);
+            if (ProveedorDTO == null)
             {
                 return HttpNotFound();
             }
-            return View(tb_proveedor);
+            MapeadorProveedorGUI mapper = new MapeadorProveedorGUI();
+            ModeloProveedor modelo = mapper.MapearTipo1Tipo2(ProveedorDTO);
+            return View(modelo);
         }
 
         // GET: Proveedor/Create
@@ -44,18 +57,20 @@ namespace ASPConcesionario.Controllers.Parameters
         // POST: Proveedor/Create
         // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que quiere enlazarse. Para obtener 
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
+        //[Bind(Include = "Id,Nombre")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id,razon_social,direccion,telefono,correo")] tb_proveedor tb_proveedor)
+        public ActionResult Create( ModeloProveedor modelo)
         {
             if (ModelState.IsValid)
             {
-                db.tb_proveedor.Add(tb_proveedor);
-                db.SaveChanges();
+                MapeadorProveedorGUI mapper = new MapeadorProveedorGUI();
+                ProveedorDTO ProveedorDTO = mapper.MapearTipo2Tipo1(modelo);
+                logica.GuardarRegistro(ProveedorDTO);
                 return RedirectToAction("Index");
             }
 
-            return View(tb_proveedor);
+            return View(modelo);
         }
 
         // GET: Proveedor/Edit/5
@@ -65,12 +80,14 @@ namespace ASPConcesionario.Controllers.Parameters
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_proveedor tb_proveedor = db.tb_proveedor.Find(id);
-            if (tb_proveedor == null)
+            ProveedorDTO ProveedorDTO = logica.BuscarRegistro(id.Value);
+            if (ProveedorDTO == null)
             {
                 return HttpNotFound();
             }
-            return View(tb_proveedor);
+            MapeadorProveedorGUI mapper = new MapeadorProveedorGUI();
+            ModeloProveedor modelo = mapper.MapearTipo1Tipo2(ProveedorDTO);
+            return View(modelo);
         }
 
         // POST: Proveedor/Edit/5
@@ -78,15 +95,17 @@ namespace ASPConcesionario.Controllers.Parameters
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "id,razon_social,direccion,telefono,correo")] tb_proveedor tb_proveedor)
+        public ActionResult Edit( ModeloProveedor modelo)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(tb_proveedor).State = EntityState.Modified;
-                db.SaveChanges();
+                MapeadorProveedorGUI mapper = new MapeadorProveedorGUI();
+                ProveedorDTO ProveedorDTO = mapper.MapearTipo2Tipo1(modelo);
+                logica.EditarRegistro(ProveedorDTO);
+
                 return RedirectToAction("Index");
             }
-            return View(tb_proveedor);
+            return View(modelo);
         }
 
         // GET: Proveedor/Delete/5
@@ -96,12 +115,14 @@ namespace ASPConcesionario.Controllers.Parameters
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_proveedor tb_proveedor = db.tb_proveedor.Find(id);
-            if (tb_proveedor == null)
+            ProveedorDTO ProveedorDTO = logica.BuscarRegistro(id.Value);
+            if (ProveedorDTO == null)
             {
                 return HttpNotFound();
             }
-            return View(tb_proveedor);
+            MapeadorProveedorGUI mapper = new MapeadorProveedorGUI();
+            ModeloProveedor modelo = mapper.MapearTipo1Tipo2(ProveedorDTO);
+            return View(modelo);
         }
 
         // POST: Proveedor/Delete/5
@@ -109,19 +130,24 @@ namespace ASPConcesionario.Controllers.Parameters
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            tb_proveedor tb_proveedor = db.tb_proveedor.Find(id);
-            db.tb_proveedor.Remove(tb_proveedor);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
+            bool respuesta = logica.EliminarRegistro(id);
+            if (respuesta)
             {
-                db.Dispose();
+                return RedirectToAction("Index");
             }
-            base.Dispose(disposing);
+            else
+            {
+                ProveedorDTO ProveedorDTO = logica.BuscarRegistro(id);
+                if (ProveedorDTO == null)
+                {
+                    return HttpNotFound();
+                }
+                MapeadorProveedorGUI mapper = new MapeadorProveedorGUI();
+                ViewBag.mensaje = Mensajes.mensajeErrorEliminar;
+                ModeloProveedor modelo = mapper.MapearTipo1Tipo2(ProveedorDTO);
+                return View(modelo);
+            }
         }
     }
 }

@@ -22,3 +22,9 @@ select,
 textarea {
     max-width: 280px;
 }
+
+.fotoVehiculo{
+    width:200px;
+    height:200px;
+    border:2px double #808080
+}

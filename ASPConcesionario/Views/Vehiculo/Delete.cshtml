@@ -1,4 +1,4 @@
-﻿@model ASPConcesionario.ModeloBD.tb_vehiculo
+﻿@model ASPConcesionario.Models.Vehiculos.ModeloVehiculo
 
 @{
     ViewBag.Title = "Delete";
@@ -68,27 +68,27 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.tb_categoria.nombre)
+            @Html.DisplayNameFor(model => model.nombreCategoria)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.tb_categoria.nombre)
+            @Html.DisplayFor(model => model.nombreCategoria)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.tb_marca.nombre)
+            @Html.DisplayNameFor(model => model.nombreMarca)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.tb_marca.nombre)
+            @Html.DisplayFor(model => model.nombreMarca)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.tb_proveedor.razon_social)
+            @Html.DisplayNameFor(model => model.razonSocialProveedor)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.tb_proveedor.razon_social)
+            @Html.DisplayFor(model => model.razonSocialProveedor)
         </dd>
 
     </dl>

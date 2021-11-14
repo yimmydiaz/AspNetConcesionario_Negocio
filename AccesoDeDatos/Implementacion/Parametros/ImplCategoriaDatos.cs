@@ -1,4 +1,6 @@
-﻿using AccesoDeDatos.ModeloDeDatos;
+﻿using AccesoDeDatos.DbModel.Parametros;
+using AccesoDeDatos.Mapeadores.Parametros;
+using AccesoDeDatos.ModeloDeDatos;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -15,12 +17,22 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// </summary>
         /// <param name="filtro">Filtro a aplicar</param>
         /// <returns>Lista de registros con el filtro aplicado</returns>
-        public IEnumerable<tb_categoria> ListarRegistros(string filtro)
+        public IEnumerable<CategoriaDbModel> ListarRegistros(string filtro,
+                                                    int paginaActual,
+                                                    int numRegistroPagina, out int totalRegistro)
         {
-            var lista = new List<tb_categoria>();
+            var lista = new List<CategoriaDbModel>();
             using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
             {
-                lista = bd.tb_categoria.Where(x => x.nombre.ToUpper().Contains(filtro.ToUpper())).ToList();
+                int reDescartados = (paginaActual - 1) * numRegistroPagina;
+                //lista = bd.tb_marca.Where(x => x.nombre.ToUpper()
+                //       .Contains(filtro.ToUpper())).Skip(reDescartados).Take(numRegistroPagina).ToList();
+                var listaDatos = (from m in bd.tb_categoria
+                                  where m.nombre.Contains(filtro)
+                                  select m).ToList();
+                totalRegistro = listaDatos.Count();
+                listaDatos = listaDatos.OrderBy(m => m.id).Skip(reDescartados).Take(numRegistroPagina).ToList();
+                lista = new MapeadorCategoriaDatos().MapearTipo1Tipo2(listaDatos).ToList();
             }
             return lista;
         }
@@ -30,19 +42,21 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// </summary>
         /// <param name="registro">El registro  a almacenar </param>
         /// <returns>True cuando se almaneca y false cuando ya existe un registro igual o una excepcion </returns>
-        public bool GuardarRegistro(tb_categoria registro)
+        public bool GuardarRegistro(CategoriaDbModel registro)
         {
             try
             {
                 using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
                 {
                     // Verificacion de la existencia de un registro con el mismo nombre
-                    if (bd.tb_categoria.Where(x => x.nombre.ToLower().Equals(registro.nombre.ToLower())).Count() > 0)
+                    if (bd.tb_categoria.Where(x => x.nombre.ToLower().Equals(registro.Nombre.ToLower())).Count() > 0)
                     {
                         return false;
                     }
 
-                    bd.tb_categoria.Add(registro);
+                    MapeadorCategoriaDatos mapeador = new MapeadorCategoriaDatos();
+                    var regis = mapeador.MapearTipo2Tipo1(registro);
+                    bd.tb_categoria.Add(regis);
                     bd.SaveChanges();
                     return true;
                 }
@@ -58,13 +72,13 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// </summary>
         /// <param name="id">id del registro buscado</param>
         /// <returns>El objeto con el id buscado o null cuando no exista</returns>
-        public tb_categoria BuscarRegistro(int id)
+        public CategoriaDbModel BuscarRegistro(int id)
         {
 
             using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
             {
                 tb_categoria registro = bd.tb_categoria.Find(id);
-                return registro;
+                return new MapeadorCategoriaDatos().MapearTipo1Tipo2(registro);
             }
         }
 
@@ -74,19 +88,21 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// <param name="registro">el registro a editar</param>
         /// <returns>True cuando se edita y false cuando no existe el registro igual o una excepcion</returns>
 
-        public bool EditarRegistro(tb_categoria registro)
+        public bool EditarRegistro(CategoriaDbModel registro)
         {
             try
             {
                 using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
                 {
                     // Verificacion de la existencia de un registro con el mismo nombre
-                    if (bd.tb_categoria.Where(x => x.id == registro.id).Count() == 0)
+                    if (bd.tb_categoria.Where(x => x.id == registro.Id).Count() == 0)
                     {
                         return false;
                     }
 
-                    bd.Entry(registro).State = EntityState.Modified;
+                    MapeadorCategoriaDatos mapeador = new MapeadorCategoriaDatos();
+                    var regis = mapeador.MapearTipo2Tipo1(registro);
+                    bd.tb_categoria.Add(regis);
                     bd.SaveChanges();
                     return true;
                 }

@@ -20,6 +20,12 @@
         <AssociationConnector Association="ConcesionarioBDModel.FK__tb_vehicu__id_ma__276EDEB3" ManuallyRouted="false" />
         <AssociationConnector Association="ConcesionarioBDModel.FK__tb_vehicu__id_pr__29572725" ManuallyRouted="false" />
         <AssociationConnector Association="ConcesionarioBDModel.FK__tb_usuari__id_ve__2F10007B" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="ConcesionarioBDModel.tb_factura" Width="1.5" PointX="9.5" PointY="5" />
+        <EntityTypeShape EntityType="ConcesionarioBDModel.tb_ventas" Width="1.5" PointX="7.25" PointY="4.75" />
+        <AssociationConnector Association="ConcesionarioBDModel.FK__tb_ventas__id_cl__38996AB5" />
+        <AssociationConnector Association="ConcesionarioBDModel.FK__tb_factur__id_ve__3B75D760" />
+        <AssociationConnector Association="ConcesionarioBDModel.FK__tb_ventas__id_ve__36B12243" />
+        <AssociationConnector Association="ConcesionarioBDModel.FK__tb_ventas__id_ve__37A5467C" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -1,4 +1,6 @@
-﻿@model IEnumerable<ASPConcesionario.ModeloBD.tb_proveedor>
+﻿@model IEnumerable<ASPConcesionario.Models.Parametros.ModeloProveedor>
+
+
 
 @{
     ViewBag.Title = "Index";
@@ -12,40 +14,42 @@
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.razon_social)
+            @Html.DisplayNameFor(model => model.Razon_Social)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.direccion)
+            @Html.DisplayNameFor(model => model.Direccion)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.telefono)
+            @Html.DisplayNameFor(model => model.Telefono)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.correo)
+            @Html.DisplayNameFor(model => model.Correo)
         </th>
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.razon_social)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.direccion)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.telefono)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.correo)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.id}, new { @class = "btn btn-primary" }) |
-            @Html.ActionLink("Details", "Details", new { id=item.id }, new { @class = "btn btn-warning" }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.id },  new { @class = "btn btn-danger" })
-        </td>
-    </tr>
-}
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Razon_Social)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Direccion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Telefono)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Correo)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary" }) |
+                @Html.ActionLink("Details", "Details", new { id = item.Id }, new { @class = "btn btn-warning" }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger" })
+            </td>
+        </tr>
+    }
 
 </table>
+@Html.Partial("_Footer_pageList")

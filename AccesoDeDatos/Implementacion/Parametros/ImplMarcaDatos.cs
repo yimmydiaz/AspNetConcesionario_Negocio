@@ -1,4 +1,6 @@
-﻿using AccesoDeDatos.ModeloDeDatos;
+﻿using AccesoDeDatos.DbModel.Parametros;
+using AccesoDeDatos.Mapeadores.Parametros;
+using AccesoDeDatos.ModeloDeDatos;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -15,12 +17,22 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// </summary>
         /// <param name="filtro">Filtro a aplicar</param>
         /// <returns>Lista de registros con el filtro aplicado</returns>
-        public IEnumerable<tb_marca> ListarRegistros(string filtro)
+        public IEnumerable<MarcaDbModel> ListarRegistros(string filtro,
+                                                     int paginaActual,
+                                                     int numRegistroPagina, out int totalRegistro)
         {
-            var lista = new List<tb_marca>();
+            var lista = new List<MarcaDbModel>();
             using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
             {
-                lista = bd.tb_marca.Where(x => x.nombre.ToUpper().Contains(filtro.ToUpper())).ToList();
+               int reDescartados = (paginaActual - 1) * numRegistroPagina;
+                //lista = bd.tb_marca.Where(x => x.nombre.ToUpper()
+                //       .Contains(filtro.ToUpper())).Skip(reDescartados).Take(numRegistroPagina).ToList();
+                var listaDatos = (from m in bd.tb_marca
+                         where m.nombre.Contains(filtro)
+                         select m).ToList();
+                totalRegistro = listaDatos.Count();
+                listaDatos = listaDatos.OrderBy(m => m.id).Skip(reDescartados).Take(numRegistroPagina).ToList();
+                lista = new MapeadorMarcaDatos().MapearTipo1Tipo2(listaDatos).ToList();
             }
             return lista;
         }
@@ -30,19 +42,21 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// </summary>
         /// <param name="registro">El registro  a almacenar </param>
         /// <returns>True cuando se almaneca y false cuando ya existe un registro igual o una excepcion </returns>
-        public bool GuardarRegistro(tb_marca registro)
+        public bool GuardarRegistro(MarcaDbModel registro)
         {
             try
             {
                 using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
                 {
                     // Verificacion de la existencia de un registro con el mismo nombre
-                    if (bd.tb_marca.Where(x => x.nombre.ToLower().Equals(registro.nombre.ToLower())).Count() > 0)
+                    if (bd.tb_marca.Where(x => x.nombre.ToLower().Equals(registro.Nombre.ToLower())).Count() > 0)
                     {
                         return false;
                     }
 
-                    bd.tb_marca.Add(registro);
+                    MapeadorMarcaDatos mapeadorMarca = new MapeadorMarcaDatos();
+                    var regis =mapeadorMarca.MapearTipo2Tipo1(registro);
+                    bd.tb_marca.Add(regis);
                     bd.SaveChanges();
                     return true;
                 }
@@ -58,13 +72,13 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// </summary>
         /// <param name="id">id del registro buscado</param>
         /// <returns>El objeto con el id buscado o null cuando no exista</returns>
-        public tb_marca BuscarRegistro(int id)
+        public MarcaDbModel BuscarRegistro(int id)
         {
 
             using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
             {
                 tb_marca registro = bd.tb_marca.Find(id);
-                return registro;
+                return new MapeadorMarcaDatos().MapearTipo1Tipo2( registro);
             }
         }
 
@@ -74,19 +88,20 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// <param name="registro">el registro a editar</param>
         /// <returns>True cuando se edita y false cuando no existe el registro igual o una excepcion</returns>
 
-        public bool EditarRegistro(tb_marca registro)
+        public bool EditarRegistro(MarcaDbModel registro)
         {
             try
             {
                 using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
                 {
                     // Verificacion de la existencia de un registro con el mismo nombre
-                    if (bd.tb_marca.Where(x => x.id == registro.id).Count() == 0)
+                    if (bd.tb_marca.Where(x => x.id == registro.Id).Count() == 0)
                     {
                         return false;
                     }
-
-                    bd.Entry(registro).State = EntityState.Modified;
+                    MapeadorMarcaDatos mapeadorMarca = new MapeadorMarcaDatos();
+                    var regis = mapeadorMarca.MapearTipo2Tipo1(registro);
+                    bd.Entry(regis).State = EntityState.Modified;
                     bd.SaveChanges();
                     return true;
                 }
@@ -114,7 +129,7 @@ namespace AccesoDeDatos.Implementacion.Parametros
                 using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
                 {
                     tb_marca registro = bd.tb_marca.Find(id);
-                    if (registro == null)
+                    if (registro == null || registro.tb_vehiculo.Count()>0)
                     {
                         return false;
                     }

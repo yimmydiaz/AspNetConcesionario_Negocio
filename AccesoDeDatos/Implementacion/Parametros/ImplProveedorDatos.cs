@@ -1,4 +1,6 @@
-﻿using AccesoDeDatos.ModeloDeDatos;
+﻿using AccesoDeDatos.DbModel.Parametros;
+using AccesoDeDatos.Mapeadores.Parametros;
+using AccesoDeDatos.ModeloDeDatos;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -8,19 +10,29 @@ using System.Threading.Tasks;
 
 namespace AccesoDeDatos.Implementacion.Parametros
 {
-    public class ImplPreveedorDatos
+    public class ImplProveedorDatos
     {
         /// <summary>
         /// Metodo para listar registros con un filtro
         /// </summary>
         /// <param name="filtro">Filtro a aplicar</param>
         /// <returns>Lista de registros con el filtro aplicado</returns>
-        public IEnumerable<tb_proveedor> ListarRegistros(string filtro)
+        public IEnumerable<ProveedorDbModel> ListarRegistros(string filtro,
+                                                     int paginaActual,
+                                                     int numRegistroPagina, out int totalRegistro)
         {
-            var lista = new List<tb_proveedor>();
+            var lista = new List<ProveedorDbModel>();
             using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
             {
-                lista = bd.tb_proveedor.Where(x => x.razon_social.ToUpper().Contains(filtro.ToUpper())).ToList();
+                int reDescartados = (paginaActual - 1) * numRegistroPagina;
+                //lista = bd.tb_proveedor.Where(x => x.nombre.ToUpper()
+                //       .Contains(filtro.ToUpper())).Skip(reDescartados).Take(numRegistroPagina).ToList();
+                var listaDatos = (from m in bd.tb_proveedor
+                                  where m.razon_social.Contains(filtro)
+                                  select m).ToList();
+                totalRegistro = listaDatos.Count();
+                listaDatos = listaDatos.OrderBy(m => m.id).Skip(reDescartados).Take(numRegistroPagina).ToList();
+                lista = new MapeadorProveedorDatos().MapearTipo1Tipo2(listaDatos).ToList();
             }
             return lista;
         }
@@ -30,19 +42,21 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// </summary>
         /// <param name="registro">El registro  a almacenar </param>
         /// <returns>True cuando se almaneca y false cuando ya existe un registro igual o una excepcion </returns>
-        public bool GuardarRegistro(tb_proveedor registro)
+        public bool GuardarRegistro(ProveedorDbModel registro)
         {
             try
             {
                 using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
                 {
                     // Verificacion de la existencia de un registro con el mismo nombre
-                    if (bd.tb_proveedor.Where(x => x.razon_social.ToLower().Equals(registro.razon_social.ToLower())).Count() > 0)
+                    if (bd.tb_proveedor.Where(x => x.razon_social.ToLower().Equals(registro.Razon_Social.ToLower())).Count() > 0)
                     {
                         return false;
                     }
 
-                    bd.tb_proveedor.Add(registro);
+                    MapeadorProveedorDatos mapeadorProveedor = new MapeadorProveedorDatos();
+                    var regis = mapeadorProveedor.MapearTipo2Tipo1(registro);
+                    bd.tb_proveedor.Add(regis);
                     bd.SaveChanges();
                     return true;
                 }
@@ -58,13 +72,13 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// </summary>
         /// <param name="id">id del registro buscado</param>
         /// <returns>El objeto con el id buscado o null cuando no exista</returns>
-        public tb_proveedor BuscarRegistro(int id)
+        public ProveedorDbModel BuscarRegistro(int id)
         {
 
             using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
             {
                 tb_proveedor registro = bd.tb_proveedor.Find(id);
-                return registro;
+                return new MapeadorProveedorDatos().MapearTipo1Tipo2(registro);
             }
         }
 
@@ -74,19 +88,20 @@ namespace AccesoDeDatos.Implementacion.Parametros
         /// <param name="registro">el registro a editar</param>
         /// <returns>True cuando se edita y false cuando no existe el registro igual o una excepcion</returns>
 
-        public bool EditarRegistro(tb_proveedor registro)
+        public bool EditarRegistro(ProveedorDbModel registro)
         {
             try
             {
                 using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
                 {
                     // Verificacion de la existencia de un registro con el mismo nombre
-                    if (bd.tb_proveedor.Where(x => x.id == registro.id).Count() == 0)
+                    if (bd.tb_proveedor.Where(x => x.id == registro.Id).Count() == 0)
                     {
                         return false;
                     }
-
-                    bd.Entry(registro).State = EntityState.Modified;
+                    MapeadorProveedorDatos mapeadorProveedor = new MapeadorProveedorDatos();
+                    var regis = mapeadorProveedor.MapearTipo2Tipo1(registro);
+                    bd.Entry(regis).State = EntityState.Modified;
                     bd.SaveChanges();
                     return true;
                 }
@@ -114,7 +129,7 @@ namespace AccesoDeDatos.Implementacion.Parametros
                 using (ConcesionarioBDEntities bd = new ConcesionarioBDEntities())
                 {
                     tb_proveedor registro = bd.tb_proveedor.Find(id);
-                    if (registro == null)
+                    if (registro == null || registro.tb_vehiculo.Count() > 0)
                     {
                         return false;
                     }

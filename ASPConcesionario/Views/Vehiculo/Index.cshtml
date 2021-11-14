@@ -1,4 +1,6 @@
-﻿@model IEnumerable<ASPConcesionario.ModeloBD.tb_vehiculo>
+﻿@model IEnumerable<ASPConcesionario.Models.Vehiculos.ModeloVehiculo>
+@using PagedList.Mvc;
+@using PagedList;
 
 @{
     ViewBag.Title = "Index";
@@ -33,55 +35,57 @@
             @Html.DisplayNameFor(model => model.estado)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.tb_categoria.nombre)
+            @Html.DisplayNameFor(model => model.nombreCategoria)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.tb_marca.nombre)
+            @Html.DisplayNameFor(model => model.nombreMarca)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.tb_proveedor.razon_social)
+            @Html.DisplayNameFor(model => model.razonSocialProveedor)
         </th>
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.color)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.modelo)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.serie_chasis)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.serie_motor)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.precio)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.descuento)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.estado)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.tb_categoria.nombre)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.tb_marca.nombre)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.tb_proveedor.razon_social)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.id })
-        </td>
-    </tr>
-}
-
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.color)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.modelo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.serie_chasis)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.serie_motor)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.precio)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.descuento)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.estado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.nombreCategoria)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.nombreMarca)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.razonSocialProveedor)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.id }) |
+                @Html.ActionLink("Details", "Details", new { id = item.id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.id }) |
+                @Html.ActionLink("Fotografias", "UploadFile", new { id = item.id })
+            </td>
+        </tr>
+    }
 </table>
+@Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page }))

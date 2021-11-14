@@ -14,6 +14,12 @@ namespace AccesoDeDatos.ModeloDeDatos
     
     public partial class tb_cliente
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public tb_cliente()
+        {
+            this.tb_ventas = new HashSet<tb_ventas>();
+        }
+    
         public int id { get; set; }
         public string primer_nombre { get; set; }
         public string otros_nombres { get; set; }
@@ -29,5 +35,7 @@ namespace AccesoDeDatos.ModeloDeDatos
     
         public virtual tb_vendedor tb_vendedor { get; set; }
         public virtual tb_vendedor tb_vendedor1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<tb_ventas> tb_ventas { get; set; }
     }
 }

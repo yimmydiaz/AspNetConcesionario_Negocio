@@ -50,10 +50,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DbModel\Parametros\CategoriaDbModel.cs" />
+    <Compile Include="DbModel\Parametros\MarcaDbModel.cs" />
+    <Compile Include="DbModel\Parametros\ProveedorDbModel.cs" />
+    <Compile Include="DbModel\Vehiculo\FotoVehiculoDbModel.cs" />
+    <Compile Include="DbModel\Vehiculo\VehiculoDbModel.cs" />
     <Compile Include="Implementacion\Parametros\ImplProveedorDatos.cs" />
     <Compile Include="Implementacion\Parametros\ImplCategoriaDatos.cs" />
     <Compile Include="Implementacion\Parametros\ImplMarcaDatos.cs" />
     <Compile Include="Implementacion\Vehiculo\ImplVehiculoDatos.cs" />
+    <Compile Include="Mapeadores\MapeadorBaseDatos.cs" />
+    <Compile Include="Mapeadores\Parametros\MapeadorCategoriaDatos.cs" />
+    <Compile Include="Mapeadores\Parametros\MapeadorMarcaDatos.cs" />
+    <Compile Include="Mapeadores\Parametros\MapeadorProveedorDatos.cs" />
+    <Compile Include="Mapeadores\Vehiculo\MapeadorFotoVehiculoDatos.cs" />
+    <Compile Include="Mapeadores\Vehiculo\MapeadorVehiculoDatos.cs" />
     <Compile Include="ModeloDeDatos\ModeloConcesionario.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -75,6 +86,9 @@
     <Compile Include="ModeloDeDatos\tb_cliente.cs">
       <DependentUpon>ModeloConcesionario.tt</DependentUpon>
     </Compile>
+    <Compile Include="ModeloDeDatos\tb_factura.cs">
+      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
+    </Compile>
     <Compile Include="ModeloDeDatos\tb_fotos.cs">
       <DependentUpon>ModeloConcesionario.tt</DependentUpon>
     </Compile>
@@ -91,6 +105,9 @@
       <DependentUpon>ModeloConcesionario.tt</DependentUpon>
     </Compile>
     <Compile Include="ModeloDeDatos\tb_vendedor.cs">
+      <DependentUpon>ModeloConcesionario.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ModeloDeDatos\tb_ventas.cs">
       <DependentUpon>ModeloConcesionario.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

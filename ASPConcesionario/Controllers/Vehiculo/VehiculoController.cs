@@ -1,24 +1,37 @@
-﻿using System;
+﻿using ASPConcesionario.Helpers;
+using ASPConcesionario.Mapeadores.Vehiculo;
+using ASPConcesionario.Models.Vehiculos;
+using LogicaNegocio.DTO.Vehiculo;
+using LogicaNegocio.Implementacion.Vehiculo;
+using PagedList;
+using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using ASPConcesionario.ModeloBD;
+
 
 namespace ASPConcesionario.Controllers.Vehiculo
 {
     public class VehiculoController : Controller
     {
-        private ConcesionarioBDEntities db = new ConcesionarioBDEntities();
+        private ImplVehiculoLogica logica = new ImplVehiculoLogica();
 
         // GET: Vehiculo
-        public ActionResult Index()
+        public ActionResult Index(int? page, string filtro = "")
         {
-            var tb_vehiculo = db.tb_vehiculo.Include(t => t.tb_categoria).Include(t => t.tb_marca).Include(t => t.tb_proveedor);
-            return View(tb_vehiculo.ToList());
+            int numPagina = page ?? 1;
+            int registroPorPagina = DatosGenerales.RegistroPorPagina;
+            int totalRegistro;
+            IEnumerable<VehiculoDTO> listaDatos = logica.ListarRegistros(
+                            filtro, numPagina, registroPorPagina, out totalRegistro);
+            MapeadorVehiculoGUI mapper = new MapeadorVehiculoGUI();
+            IEnumerable<ModeloVehiculo> listaModelo = mapper.MapearTipo1Tipo2(listaDatos);
+            //var registroPagina = listaModelo.ToPagedList(numPagina, 2);
+            var listaPagina = new StaticPagedList<ModeloVehiculo>
+                (listaModelo, numPagina, registroPorPagina, totalRegistro);
+            return View(listaPagina);
         }
 
         // GET: Vehiculo/Details/5
@@ -28,20 +41,19 @@ namespace ASPConcesionario.Controllers.Vehiculo
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_vehiculo tb_vehiculo = db.tb_vehiculo.Find(id);
-            if (tb_vehiculo == null)
+            VehiculoDTO VehiculoDTO = logica.BuscarRegistro(id.Value);
+            if (VehiculoDTO == null)
             {
                 return HttpNotFound();
             }
-            return View(tb_vehiculo);
+            MapeadorVehiculoGUI mapper = new MapeadorVehiculoGUI();
+            ModeloVehiculo modelo = mapper.MapearTipo1Tipo2(VehiculoDTO);
+            return View(modelo);
         }
 
         // GET: Vehiculo/Create
         public ActionResult Create()
         {
-            ViewBag.id_categoria = new SelectList(db.tb_categoria, "id", "nombre");
-            ViewBag.id_marca = new SelectList(db.tb_marca, "id", "nombre");
-            ViewBag.id_proveedor = new SelectList(db.tb_proveedor, "id", "razon_social");
             return View();
         }
 
@@ -50,19 +62,17 @@ namespace ASPConcesionario.Controllers.Vehiculo
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id,color,modelo,serie_chasis,serie_motor,id_marca,id_categoria,precio,descuento,estado,id_proveedor")] tb_vehiculo tb_vehiculo)
+        public ActionResult Create( ModeloVehiculo modelo)
         {
             if (ModelState.IsValid)
             {
-                db.tb_vehiculo.Add(tb_vehiculo);
-                db.SaveChanges();
+                MapeadorVehiculoGUI mapper = new MapeadorVehiculoGUI();
+                VehiculoDTO VehiculoDTO = mapper.MapearTipo2Tipo1(modelo);
+                logica.GuardarRegistro(VehiculoDTO);
                 return RedirectToAction("Index");
             }
-
-            ViewBag.id_categoria = new SelectList(db.tb_categoria, "id", "nombre", tb_vehiculo.id_categoria);
-            ViewBag.id_marca = new SelectList(db.tb_marca, "id", "nombre", tb_vehiculo.id_marca);
-            ViewBag.id_proveedor = new SelectList(db.tb_proveedor, "id", "razon_social", tb_vehiculo.id_proveedor);
-            return View(tb_vehiculo);
+           // ViewBag.OperatorId = new SelectList(modelo.id_marca, "id_Marca");
+            return View(modelo);
         }
 
         // GET: Vehiculo/Edit/5
@@ -72,15 +82,14 @@ namespace ASPConcesionario.Controllers.Vehiculo
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_vehiculo tb_vehiculo = db.tb_vehiculo.Find(id);
-            if (tb_vehiculo == null)
+            VehiculoDTO VehiculoDTO = logica.BuscarRegistro(id.Value);
+            if (VehiculoDTO == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.id_categoria = new SelectList(db.tb_categoria, "id", "nombre", tb_vehiculo.id_categoria);
-            ViewBag.id_marca = new SelectList(db.tb_marca, "id", "nombre", tb_vehiculo.id_marca);
-            ViewBag.id_proveedor = new SelectList(db.tb_proveedor, "id", "razon_social", tb_vehiculo.id_proveedor);
-            return View(tb_vehiculo);
+            MapeadorVehiculoGUI mapper = new MapeadorVehiculoGUI();
+            ModeloVehiculo modelo = mapper.MapearTipo1Tipo2(VehiculoDTO);
+            return View(modelo);
         }
 
         // POST: Vehiculo/Edit/5
@@ -88,18 +97,17 @@ namespace ASPConcesionario.Controllers.Vehiculo
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "id,color,modelo,serie_chasis,serie_motor,id_marca,id_categoria,precio,descuento,estado,id_proveedor")] tb_vehiculo tb_vehiculo)
+        public ActionResult Edit(ModeloVehiculo modelo)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(tb_vehiculo).State = EntityState.Modified;
-                db.SaveChanges();
+                MapeadorVehiculoGUI mapper = new MapeadorVehiculoGUI();
+                VehiculoDTO VehiculoDTO = mapper.MapearTipo2Tipo1(modelo);
+                logica.EditarRegistro(VehiculoDTO);
+
                 return RedirectToAction("Index");
             }
-            ViewBag.id_categoria = new SelectList(db.tb_categoria, "id", "nombre", tb_vehiculo.id_categoria);
-            ViewBag.id_marca = new SelectList(db.tb_marca, "id", "nombre", tb_vehiculo.id_marca);
-            ViewBag.id_proveedor = new SelectList(db.tb_proveedor, "id", "razon_social", tb_vehiculo.id_proveedor);
-            return View(tb_vehiculo);
+            return View(modelo);
         }
 
         // GET: Vehiculo/Delete/5
@@ -109,12 +117,14 @@ namespace ASPConcesionario.Controllers.Vehiculo
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_vehiculo tb_vehiculo = db.tb_vehiculo.Find(id);
-            if (tb_vehiculo == null)
+            VehiculoDTO VehiculoDTO = logica.BuscarRegistro(id.Value);
+            if (VehiculoDTO == null)
             {
                 return HttpNotFound();
             }
-            return View(tb_vehiculo);
+            MapeadorVehiculoGUI mapper = new MapeadorVehiculoGUI();
+            ModeloVehiculo modelo = mapper.MapearTipo1Tipo2(VehiculoDTO);
+            return View(modelo);
         }
 
         // POST: Vehiculo/Delete/5
@@ -122,19 +132,117 @@ namespace ASPConcesionario.Controllers.Vehiculo
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            tb_vehiculo tb_vehiculo = db.tb_vehiculo.Find(id);
-            db.tb_vehiculo.Remove(tb_vehiculo);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+
+            bool respuesta = logica.EliminarRegistro(id);
+            if (respuesta)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                VehiculoDTO VehiculoDTO = logica.BuscarRegistro(id);
+                if (VehiculoDTO == null)
+                {
+                    return HttpNotFound();
+                }
+                MapeadorVehiculoGUI mapper = new MapeadorVehiculoGUI();
+                ViewBag.mensaje = Mensajes.mensajeErrorEliminar;
+                ModeloVehiculo modelo = mapper.MapearTipo1Tipo2(VehiculoDTO);
+                return View(modelo);
+            }
         }
 
-        protected override void Dispose(bool disposing)
+        [HttpGet]
+        public ActionResult UploadFile(int? id)
         {
-            if (disposing)
+            if (id == null)
             {
-                db.Dispose();
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            base.Dispose(disposing);
+            ModeloCargaImagenVehiculo modelo = CrearModeloCargarImagenVehiculo(id);
+            return View(modelo);
+        }
+
+        private ModeloCargaImagenVehiculo CrearModeloCargarImagenVehiculo(int? id)
+        {
+            IEnumerable<FotoVehiculoDTO> listaDTO = logica.ListaFotosVehiculoPorId(id.Value);
+            MapeadorFotoVehiculoGUI mapeador = new MapeadorFotoVehiculoGUI();
+            IEnumerable<ModeloFotoVehiculo> listaFotos = mapeador.MapearTipo1Tipo2(listaDTO);
+            if(listaFotos == null)
+            {
+                listaFotos = new List<ModeloFotoVehiculo>();
+            }
+            ModeloCargaImagenVehiculo modelo = new ModeloCargaImagenVehiculo()
+            {
+                Id = id.Value,
+                ListaImagenesVehiculo = listaFotos
+            };
+            return modelo;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UploadFile(ModeloCargaImagenVehiculo modelo)
+        {
+            try
+            {
+                if (modelo.Archivo.ContentLength > 0)
+                {
+                    try
+                    {
+                        DateTime ahora = DateTime.Now;
+                        string fecha_nombre = String.Format("{0}_{1}_{2}_{3}_{4}_{5}",
+                                                ahora.Day, ahora.Month, ahora.Year, ahora.Hour,
+                                                ahora.Minute, ahora.Millisecond);
+
+                        string nombreArchivo = String.Concat(fecha_nombre, "_",
+                                               Path.GetFileName(modelo.Archivo.FileName));
+
+                        string rutaCarpeta = DatosGenerales.RutaArchivosVehiculos;
+                        string rutaCompletaArchivo = Path.Combine(Server.MapPath(rutaCarpeta), nombreArchivo);
+                        modelo.Archivo.SaveAs(rutaCompletaArchivo);
+                        FotoVehiculoDTO dto = new FotoVehiculoDTO()
+                        {
+                            IdVehiculo = modelo.Id,
+                            NombreFoto = nombreArchivo
+
+                        };
+
+                        logica.GuardarNombreFoto(dto);
+                        ViewBag.UploadFileMessage = "Archivo cargado correctamente";
+                        ModeloCargaImagenVehiculo modeloView = CrearModeloCargarImagenVehiculo(modelo.Id); 
+                        return View(modeloView);
+                    }
+                    catch
+                    {
+
+                    }
+                  
+                }
+                ViewBag.UploadFileMessage = "Por favor selecciones un archivo";
+                return View();
+            }
+            catch (Exception e)
+            {
+                ViewBag.UploadFileMessage = "Error al cargar el archivo";
+                return View();
+            }
+        }
+
+        [HttpPost]
+        public ActionResult EliminarFoto (int idFotoVehiculo, string nombreFotoVehiculo)
+        {
+            bool respuesta = logica.EliminarRegistroFoto(idFotoVehiculo);
+            if (respuesta)
+            {
+                string rutaCarpeta = DatosGenerales.RutaArchivosVehiculos;
+                string CarpetaEliminados = DatosGenerales.CarpetaFotosVehiculosEliminadas;
+
+                string rutaOrigenCompletaArchivo = Path.Combine(Server.MapPath(rutaCarpeta), nombreFotoVehiculo);
+                string rutaDestinoCompletaArchivo = Path.Combine(Server.MapPath(rutaCarpeta),CarpetaEliminados, nombreFotoVehiculo);
+                System.IO.File.Move(rutaOrigenCompletaArchivo,rutaDestinoCompletaArchivo);
+            }
+           return RedirectToAction("Index");            
         }
     }
 }

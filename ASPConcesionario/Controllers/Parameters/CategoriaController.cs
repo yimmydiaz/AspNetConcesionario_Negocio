@@ -1,23 +1,35 @@
-﻿using System;
+﻿using ASPConcesionario.Helpers;
+using ASPConcesionario.Mapeadores.Parametros;
+using ASPConcesionario.Models.Parametros;
+using LogicaNegocio.DTO.Parametros;
+using LogicaNegocio.Implementacion.Parametros;
+using PagedList;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using ASPConcesionario.ModeloBD;
+
 
 namespace ASPConcesionario.Controllers.Parameters
 {
     public class CategoriaController : Controller
     {
-        private ConcesionarioBDEntities db = new ConcesionarioBDEntities();
+        
+        private ImplCategoriaLogica logica = new ImplCategoriaLogica();
 
         // GET: Categoria
-        public ActionResult Index()
+        public ActionResult Index(int? page, string filtro = "")
         {
-            return View(db.tb_categoria.ToList());
+            int numPagina = page ?? 1;
+            int registroPorPagina = DatosGenerales.RegistroPorPagina;
+            int totalRegistro;
+            IEnumerable<CategoriaDTO> listaDatos = logica.ListarRegistros(
+                            filtro, numPagina, registroPorPagina, out totalRegistro);
+            MapeadorCategoriaGUI mapper = new MapeadorCategoriaGUI();
+            IEnumerable<ModeloCategoria> listaModelo = mapper.MapearTipo1Tipo2(listaDatos);
+            //var registroPagina = listaModelo.ToPagedList(numPagina, 2);
+            var listaPagina = new StaticPagedList<ModeloCategoria>
+                (listaModelo, numPagina, registroPorPagina, totalRegistro);
+            return View(listaPagina);
         }
 
         // GET: Categoria/Details/5
@@ -27,12 +39,14 @@ namespace ASPConcesionario.Controllers.Parameters
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_categoria tb_categoria = db.tb_categoria.Find(id);
-            if (tb_categoria == null)
+            CategoriaDTO CategoriaDTO = logica.BuscarRegistro(id.Value);
+            if (CategoriaDTO == null)
             {
                 return HttpNotFound();
             }
-            return View(tb_categoria);
+            MapeadorCategoriaGUI mapper = new MapeadorCategoriaGUI();
+            ModeloCategoria modelo = mapper.MapearTipo1Tipo2(CategoriaDTO);
+            return View(modelo);
         }
 
         // GET: Categoria/Create
@@ -46,16 +60,17 @@ namespace ASPConcesionario.Controllers.Parameters
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "id,nombre")] tb_categoria tb_categoria)
+        public ActionResult Create([Bind(Include = "id,nombre")] ModeloCategoria modelo)
         {
             if (ModelState.IsValid)
             {
-                db.tb_categoria.Add(tb_categoria);
-                db.SaveChanges();
+                MapeadorCategoriaGUI mapper = new MapeadorCategoriaGUI();
+                CategoriaDTO categoriaDTO = mapper.MapearTipo2Tipo1(modelo);
+                logica.GuardarRegistro(categoriaDTO);
                 return RedirectToAction("Index");
             }
 
-            return View(tb_categoria);
+            return View(modelo);
         }
 
         // GET: Categoria/Edit/5
@@ -65,12 +80,14 @@ namespace ASPConcesionario.Controllers.Parameters
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_categoria tb_categoria = db.tb_categoria.Find(id);
-            if (tb_categoria == null)
+            CategoriaDTO categoriaDTO =logica.BuscarRegistro(id.Value);
+            if (categoriaDTO == null)
             {
                 return HttpNotFound();
             }
-            return View(tb_categoria);
+            MapeadorCategoriaGUI mapper = new MapeadorCategoriaGUI();
+            ModeloCategoria modelo = mapper.MapearTipo1Tipo2(categoriaDTO);
+            return View(modelo);
         }
 
         // POST: Categoria/Edit/5
@@ -78,15 +95,16 @@ namespace ASPConcesionario.Controllers.Parameters
         // más detalles, vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "id,nombre")] tb_categoria tb_categoria)
+        public ActionResult Edit([Bind(Include = "id,nombre")] ModeloCategoria modelo)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(tb_categoria).State = EntityState.Modified;
-                db.SaveChanges();
+                MapeadorCategoriaGUI mapper = new MapeadorCategoriaGUI();
+                CategoriaDTO categoriaDTO = mapper.MapearTipo2Tipo1(modelo);
+                logica.GuardarRegistro(categoriaDTO);
                 return RedirectToAction("Index");
             }
-            return View(tb_categoria);
+            return View(modelo);
         }
 
         // GET: Categoria/Delete/5
@@ -96,12 +114,14 @@ namespace ASPConcesionario.Controllers.Parameters
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            tb_categoria tb_categoria = db.tb_categoria.Find(id);
-            if (tb_categoria == null)
+            CategoriaDTO categoriaDTO = logica.BuscarRegistro(id.Value);
+            if (categoriaDTO == null)
             {
                 return HttpNotFound();
             }
-            return View(tb_categoria);
+            MapeadorCategoriaGUI mapper = new MapeadorCategoriaGUI();
+            ModeloCategoria modelo = mapper.MapearTipo1Tipo2(categoriaDTO);
+            return View(modelo);
         }
 
         // POST: Categoria/Delete/5
@@ -109,19 +129,26 @@ namespace ASPConcesionario.Controllers.Parameters
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            tb_categoria tb_categoria = db.tb_categoria.Find(id);
-            db.tb_categoria.Remove(tb_categoria);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+
+            bool respuesta = logica.EliminarRegistro(id);
+            if (respuesta)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                CategoriaDTO categoriaDTO = logica.BuscarRegistro(id);
+                if (categoriaDTO == null)
+                {
+                    return HttpNotFound();
+                }
+                MapeadorCategoriaGUI mapper = new MapeadorCategoriaGUI();
+                ViewBag.mensaje = Mensajes.mensajeErrorEliminar;
+                ModeloCategoria modelo = mapper.MapearTipo1Tipo2(categoriaDTO);
+                return View(modelo);
+            }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+       
     }
 }
